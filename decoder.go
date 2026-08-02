@@ -86,56 +86,7 @@ func ReadEntry(in io.ReadSeeker) (Entry, error) {
 	case EntryTypeAssignment:
 		return ReadAssignment(in)
 	case EntryTypeArray:
-		name, err := readAsciiz(in)
-		if err != nil {
-			return nil, err
-		}
-		elementCount, err := readCompressedInteger(in)
-		if err != nil {
-			return nil, err
-		}
-		array := Array{Name: string(name), Values: make([]ArrayValue, elementCount)}
-
-		var elementType ArrayValueType
-		for i := range elementCount {
-			err = binary.Read(in, binary.LittleEndian, &elementType)
-			if err != nil {
-				return nil, err
-			}
-			switch elementType {
-			case ArrayValueTypeString:
-				value, err := readAsciiz(in)
-				if err != nil {
-					return nil, err
-				}
-				array.Values[i] = ArrayValue{Type: ArrayValueTypeString, Value: string(value)}
-			case ArrayValueTypeFloat:
-				var value float32
-				err = binary.Read(in, binary.LittleEndian, &value)
-				if err != nil {
-					return nil, err
-				}
-				array.Values[i] = ArrayValue{Type: ArrayValueTypeFloat, Value: value}
-			case ArrayValueTypeLong:
-				var value int32
-				err = binary.Read(in, binary.LittleEndian, &value)
-				if err != nil {
-					return nil, err
-				}
-				array.Values[i] = ArrayValue{Type: ArrayValueTypeLong, Value: value}
-			case ArrayValueTypeArray:
-				return nil, fmt.Errorf("error: recursive arrays not implemented")
-			case ArrayValueTypeVariable:
-				value, err := readAsciiz(in)
-				if err != nil {
-					return nil, err
-				}
-				array.Values[i] = ArrayValue{Type: ArrayValueTypeVariable, Value: string(value)}
-			default:
-				return nil, fmt.Errorf("error: unknown array element type %d", elementType)
-			}
-		}
-		return &array, nil
+		return ReadArray(in)
 	case EntryTypeExtern:
 		fmt.Fprintln(os.Stderr, "extern")
 		return nil, nil
@@ -235,4 +186,57 @@ func ReadAssignment(in io.ReadSeeker) (*Assignment, error) {
 	assignment.Subtype = AssignmentType(subtype)
 
 	return &assignment, nil
+}
+
+func ReadArray(in io.ReadSeeker) (*Array, error) {
+	name, err := readAsciiz(in)
+	if err != nil {
+		return nil, err
+	}
+	elementCount, err := readCompressedInteger(in)
+	if err != nil {
+		return nil, err
+	}
+	array := Array{Name: string(name), Values: make([]ArrayValue, elementCount)}
+
+	var elementType ArrayValueType
+	for i := range elementCount {
+		err = binary.Read(in, binary.LittleEndian, &elementType)
+		if err != nil {
+			return nil, err
+		}
+		switch elementType {
+		case ArrayValueTypeString:
+			value, err := readAsciiz(in)
+			if err != nil {
+				return nil, err
+			}
+			array.Values[i] = ArrayValue{Type: ArrayValueTypeString, Value: string(value)}
+		case ArrayValueTypeFloat:
+			var value float32
+			err = binary.Read(in, binary.LittleEndian, &value)
+			if err != nil {
+				return nil, err
+			}
+			array.Values[i] = ArrayValue{Type: ArrayValueTypeFloat, Value: value}
+		case ArrayValueTypeLong:
+			var value int32
+			err = binary.Read(in, binary.LittleEndian, &value)
+			if err != nil {
+				return nil, err
+			}
+			array.Values[i] = ArrayValue{Type: ArrayValueTypeLong, Value: value}
+		case ArrayValueTypeArray:
+			return nil, fmt.Errorf("error: recursive arrays not implemented")
+		case ArrayValueTypeVariable:
+			value, err := readAsciiz(in)
+			if err != nil {
+				return nil, err
+			}
+			array.Values[i] = ArrayValue{Type: ArrayValueTypeVariable, Value: string(value)}
+		default:
+			return nil, fmt.Errorf("error: unknown array element type %d", elementType)
+		}
+	}
+	return &array, nil
 }
