@@ -57,4 +57,20 @@ func Test_PrintAssignment(t *testing.T) {
 
 		assert.Equal(t, `example = 23512;`+"\n", buf.String())
 	})
+
+	t.Run("variable", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		printer.New().Assignment(
+			0,
+			&buf,
+			&raP.Assignment{
+				Name:    "example",
+				Subtype: raP.AssignmentTypeVariable,
+				Value:   "anotherVariable",
+			},
+		)
+
+		assert.Equal(t, `example = anotherVariable;`+"\n", buf.String())
+	})
 }

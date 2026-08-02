@@ -14,9 +14,10 @@ const (
 type AssignmentType uint8
 
 const (
-	AssignmentTypeString AssignmentType = 0
-	AssignmentTypeFloat  AssignmentType = 1
-	AssignmentTypeLong   AssignmentType = 2
+	AssignmentTypeString   AssignmentType = 0
+	AssignmentTypeFloat    AssignmentType = 1
+	AssignmentTypeLong     AssignmentType = 2
+	AssignmentTypeVariable AssignmentType = 4
 )
 
 type ArrayValueType uint8

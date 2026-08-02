@@ -207,6 +207,8 @@ func ReadAssignment(in io.ReadSeeker) (*Assignment, error) {
 
 	switch AssignmentType(subtype) {
 	case AssignmentTypeString:
+		fallthrough
+	case AssignmentTypeVariable:
 		value, err := readAsciiz(in)
 		if err != nil {
 			return nil, err

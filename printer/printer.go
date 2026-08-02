@@ -98,6 +98,8 @@ func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *raP.Ass
 		fmt.Fprintf(out, "%d", assignment.Value)
 	case raP.AssignmentTypeFloat:
 		fmt.Fprintf(out, "%f", assignment.Value)
+	case raP.AssignmentTypeVariable:
+		fmt.Fprintf(out, "%s", assignment.Value)
 	}
 	fmt.Fprint(out, ";\n")
 }
