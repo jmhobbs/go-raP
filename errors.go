@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrInvalidFileHeader = errors.New("invalid file header")
-	ErrUnsupportedType   = errors.New("unsupported type")
+	ErrInvalidFileHeader        = errors.New("invalid file header")
+	ErrAuthenticatedUnsupported = errors.New("authenticated raP not supported")
+	ErrUnsupportedType          = errors.New("unsupported type")
 )
 
 type UnknownPacketTypeError struct {

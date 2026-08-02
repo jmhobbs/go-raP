@@ -1,20 +1,30 @@
 package raP
 
-const (
-	PacketTypeClassname  = 0
-	PacketTypeTokenNames = 1
-	PacketTypeArrays     = 2
-)
+type EntryType uint8
 
 const (
-	VarTypeString  = 0
-	VarTypeFloat   = 1
-	VarTypeInteger = 2
+	EntryTypeClass         EntryType = 0
+	EntryTypeAssignment    EntryType = 1
+	EntryTypeArray         EntryType = 2
+	EntryTypeExtern        EntryType = 3
+	EntryTypeDelete        EntryType = 4
+	EntryTypeArrayWithFlag EntryType = 5
 )
 
+type AssignmentType uint8
+
 const (
-	ArrayTypeString  = 0
-	ArrayTypeFloat   = 1
-	ArrayTypeInteger = 2
-	ArrayTypeArray   = 3
+	AssignmentTypeString AssignmentType = 0
+	AssignmentTypeFloat  AssignmentType = 1
+	AssignmentTypeLong   AssignmentType = 2
+)
+
+type ArrayValueType uint8
+
+const (
+	ArrayValueTypeString   ArrayValueType = 0
+	ArrayValueTypeFloat    ArrayValueType = 1
+	ArrayValueTypeLong     ArrayValueType = 2
+	ArrayValueTypeArray    ArrayValueType = 3
+	ArrayValueTypeVariable ArrayValueType = 4
 )
