@@ -193,7 +193,7 @@ func Test_ReadArray(t *testing.T) {
 			0x02,                   // nested array 1 value 1 type
 			0x01, 0x00, 0x00, 0x00, // nested array 1 value 1
 			0x02,                   // nested array 1 value 2 type
-			0x01, 0x00, 0x00, 0x00, // nested array 1 value 2
+			0x02, 0x00, 0x00, 0x00, // nested array 1 value 2
 			0x03,                   // value 2 type
 			0x02,                   // nested array 2 count
 			0x02,                   // nested array 2 value 1 type
@@ -232,7 +232,7 @@ func Test_ReadArray(t *testing.T) {
 							},
 							{
 								Type:  raP.ArrayValueTypeLong,
-								Value: int32(3),
+								Value: int32(4),
 							},
 						},
 					},

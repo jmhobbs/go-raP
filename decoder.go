@@ -193,11 +193,21 @@ func ReadArray(in io.ReadSeeker) (*Array, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	values, err := readArrayValues(in)
+	if err != nil {
+		return nil, err
+	}
+	return &Array{Name: string(name), Values: values}, nil
+
+}
+
+func readArrayValues(in io.Reader) ([]ArrayValue, error) {
 	elementCount, err := readCompressedInteger(in)
 	if err != nil {
 		return nil, err
 	}
-	array := Array{Name: string(name), Values: make([]ArrayValue, elementCount)}
+	values := make([]ArrayValue, elementCount)
 
 	var elementType ArrayValueType
 	for i := range elementCount {
@@ -211,32 +221,36 @@ func ReadArray(in io.ReadSeeker) (*Array, error) {
 			if err != nil {
 				return nil, err
 			}
-			array.Values[i] = ArrayValue{Type: ArrayValueTypeString, Value: string(value)}
+			values[i] = ArrayValue{Type: ArrayValueTypeString, Value: string(value)}
 		case ArrayValueTypeFloat:
 			var value float32
 			err = binary.Read(in, binary.LittleEndian, &value)
 			if err != nil {
 				return nil, err
 			}
-			array.Values[i] = ArrayValue{Type: ArrayValueTypeFloat, Value: value}
+			values[i] = ArrayValue{Type: ArrayValueTypeFloat, Value: value}
 		case ArrayValueTypeLong:
 			var value int32
 			err = binary.Read(in, binary.LittleEndian, &value)
 			if err != nil {
 				return nil, err
 			}
-			array.Values[i] = ArrayValue{Type: ArrayValueTypeLong, Value: value}
+			values[i] = ArrayValue{Type: ArrayValueTypeLong, Value: value}
 		case ArrayValueTypeArray:
-			return nil, fmt.Errorf("error: recursive arrays not implemented")
+			value, err := readArrayValues(in)
+			if err != nil {
+				return nil, err
+			}
+			values[i] = ArrayValue{Type: ArrayValueTypeArray, Value: value}
 		case ArrayValueTypeVariable:
 			value, err := readAsciiz(in)
 			if err != nil {
 				return nil, err
 			}
-			array.Values[i] = ArrayValue{Type: ArrayValueTypeVariable, Value: string(value)}
+			values[i] = ArrayValue{Type: ArrayValueTypeVariable, Value: string(value)}
 		default:
 			return nil, fmt.Errorf("error: unknown array element type %d", elementType)
 		}
 	}
-	return &array, nil
+	return values, nil
 }
