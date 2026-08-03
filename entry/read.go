@@ -2,9 +2,8 @@ package entry
 
 import (
 	"encoding/binary"
-	"fmt"
+	"errors"
 	"io"
-	"os"
 )
 
 func Read(in io.ReadSeeker) (Entry, error) {
@@ -24,14 +23,11 @@ func Read(in io.ReadSeeker) (Entry, error) {
 	case EntryTypeArray:
 		return ReadArray(in)
 	case EntryTypeExtern:
-		fmt.Fprintln(os.Stderr, "extern")
-		return nil, nil
+		return nil, errors.New("extern entry type not implemented")
 	case EntryTypeDelete:
-		fmt.Fprintln(os.Stderr, "delete")
-		return nil, nil
+		return nil, errors.New("delete entry type not implemented")
 	case EntryTypeArrayWithFlag:
-		fmt.Fprintln(os.Stderr, "array with flag")
-		return nil, nil
+		return nil, errors.New("array with flag entry type not implemented")
 	}
 
 	return nil, nil
