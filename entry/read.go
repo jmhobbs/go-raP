@@ -2,7 +2,6 @@ package entry
 
 import (
 	"encoding/binary"
-	"errors"
 	"io"
 )
 
@@ -27,7 +26,7 @@ func Read(in io.ReadSeeker) (Entry, error) {
 	case EntryTypeDelete:
 		return ReadDelete(in)
 	case EntryTypeArrayWithFlag:
-		return nil, errors.New("array with flag entry type not implemented")
+		return ReadArrayWithFlag(in)
 	}
 
 	return nil, nil

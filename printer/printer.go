@@ -85,7 +85,13 @@ func (p *Printer) Entries(indentLevel int, out io.Writer, entries []entry.Entry)
 				return err
 			}
 		case entry.EntryTypeArrayWithFlag:
-			return errors.New("not implemented")
+			array, ok := e.(*entry.ArrayWithFlag)
+			if !ok {
+				return errors.New("error: ArrayWithFlag entry is not of type *ArrayWithFlag")
+			}
+			if err := p.ArrayWithFlag(indentLevel, out, array); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("unknown entry type: %d", e.Type())
 		}
@@ -175,9 +181,52 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) erro
 	if _, err = fmt.Fprintf(out, "%s[] = {\n", array.Name); err != nil {
 		return err
 	}
-	valuesAsStrings := make([]string, len(array.Values))
+
+	if err = p.arrayValues(indentLevel, out, array.Values); err != nil {
+		return err
+	}
+
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	_, err = fmt.Fprint(out, "};\n")
+	return err
+}
+
+func (p *Printer) ArrayWithFlag(indentLevel int, out io.Writer, array *entry.ArrayWithFlag) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+
+	var modifier string
+	if array.Flag&int32(0x01) == int32(0x01) {
+		modifier = "+"
+	}
+	// special case for empty arrays
+	if len(array.Values) == 0 {
+		_, err = fmt.Fprintf(out, "%s[] %s= {};\n", array.Name, modifier)
+		return err
+	}
+	if _, err = fmt.Fprintf(out, "%s[] %s= {\n", array.Name, modifier); err != nil {
+		return err
+	}
+
+	if err = p.arrayValues(indentLevel, out, array.Values); err != nil {
+		return err
+	}
+
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	_, err = fmt.Fprint(out, "};\n")
+	return err
+}
+
+func (p *Printer) arrayValues(indentLevel int, out io.Writer, values []entry.ArrayValue) error {
+	valuesAsStrings := make([]string, len(values))
 	valueIndent := strings.Repeat("  ", indentLevel+1)
-	for i, v := range array.Values {
+	for i, v := range values {
 		switch v.Type {
 		case entry.ArrayValueTypeString:
 			valuesAsStrings[i] = fmt.Sprintf("%s%q", valueIndent, v.Value)
@@ -192,16 +241,10 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) erro
 			return errors.New("not implemented")
 		}
 	}
-	if _, err = fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")); err != nil {
+	if _, err := fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")); err != nil {
 		return err
 	}
-	if _, err = fmt.Fprintln(out, ""); err != nil {
-		return err
-	}
-	if err = p.indent(indentLevel, out); err != nil {
-		return err
-	}
-	_, err = fmt.Fprint(out, "};\n")
+	_, err := fmt.Fprintln(out, "")
 	return err
 }
 

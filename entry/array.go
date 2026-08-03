@@ -43,7 +43,6 @@ func ReadArray(in gio.Reader) (*Array, error) {
 		return nil, err
 	}
 	return &Array{Name: string(name), Values: values}, nil
-
 }
 
 func readArrayValues(in gio.Reader) ([]ArrayValue, error) {
@@ -97,4 +96,33 @@ func readArrayValues(in gio.Reader) ([]ArrayValue, error) {
 		}
 	}
 	return values, nil
+}
+
+type ArrayWithFlag struct {
+	Name   string
+	Flag   int32
+	Values []ArrayValue
+}
+
+func (a ArrayWithFlag) Type() EntryType {
+	return EntryTypeArrayWithFlag
+}
+
+func ReadArrayWithFlag(in gio.ReadSeeker) (*ArrayWithFlag, error) {
+	var flag int32
+	err := binary.Read(in, binary.LittleEndian, &flag)
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := io.ReadAsciiz(in)
+	if err != nil {
+		return nil, err
+	}
+
+	values, err := readArrayValues(in)
+	if err != nil {
+		return nil, err
+	}
+	return &ArrayWithFlag{Name: string(name), Flag: flag, Values: values}, nil
 }
