@@ -23,9 +23,9 @@ func Read(in io.ReadSeeker) (Entry, error) {
 	case EntryTypeArray:
 		return ReadArray(in)
 	case EntryTypeExtern:
-		return nil, errors.New("extern entry type not implemented")
+		return ReadExtern(in)
 	case EntryTypeDelete:
-		return nil, errors.New("delete entry type not implemented")
+		return ReadDelete(in)
 	case EntryTypeArrayWithFlag:
 		return nil, errors.New("array with flag entry type not implemented")
 	}

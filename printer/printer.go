@@ -69,9 +69,21 @@ func (p *Printer) Entries(indentLevel int, out io.Writer, entries []entry.Entry)
 				return err
 			}
 		case entry.EntryTypeExtern:
-			fallthrough
+			extern, ok := e.(*entry.Extern)
+			if !ok {
+				return errors.New("error: Extern entry is not of type *Extern")
+			}
+			if err := p.Extern(indentLevel, out, extern); err != nil {
+				return err
+			}
 		case entry.EntryTypeDelete:
-			fallthrough
+			del, ok := e.(*entry.Delete)
+			if !ok {
+				return errors.New("error: Delete entry is not of type *Delete")
+			}
+			if err := p.Delete(indentLevel, out, del); err != nil {
+				return err
+			}
 		case entry.EntryTypeArrayWithFlag:
 			return errors.New("not implemented")
 		default:
@@ -174,6 +186,7 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) erro
 		case entry.ArrayValueTypeFloat:
 			valuesAsStrings[i] = fmt.Sprintf("%s%f", valueIndent, v.Value)
 		case entry.ArrayValueTypeArray:
+			// TODO
 			fallthrough
 		case entry.ArrayValueTypeVariable:
 			return errors.New("not implemented")
@@ -182,9 +195,31 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) erro
 	if _, err = fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")); err != nil {
 		return err
 	}
+	if _, err = fmt.Fprintln(out, ""); err != nil {
+		return err
+	}
 	if err = p.indent(indentLevel, out); err != nil {
 		return err
 	}
 	_, err = fmt.Fprint(out, "};\n")
+	return err
+}
+
+func (p *Printer) Extern(indentLevel int, out io.Writer, extern *entry.Extern) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(out, "class %s;\n", string(*extern))
+	return err
+}
+
+func (p *Printer) Delete(indentLevel int, out io.Writer, del *entry.Delete) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	// TODO: I have never actually seen this, not sure what the real syntax is
+	_, err = fmt.Fprintf(out, "delete %s;\n", string(*del))
 	return err
 }
