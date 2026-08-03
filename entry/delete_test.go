@@ -22,3 +22,13 @@ func Test_ReadDelete(t *testing.T) {
 		*del,
 	)
 }
+
+func Test_ReadDelete_Error(t *testing.T) {
+	input := []byte{
+		'g', 'o', 'o', 'd', 'b', 'y', 'e', // name, missing terminator
+	}
+
+	del, err := entry.ReadDelete(bytes.NewReader(input))
+	require.Error(t, err)
+	assert.Nil(t, del)
+}

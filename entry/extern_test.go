@@ -22,3 +22,13 @@ func Test_ReadExtern(t *testing.T) {
 		*extern,
 	)
 }
+
+func Test_ReadExtern_Error(t *testing.T) {
+	input := []byte{
+		'o', 'u', 't', 's', 'i', 'd', 'e', // name, missing terminator
+	}
+
+	extern, err := entry.ReadExtern(bytes.NewReader(input))
+	require.Error(t, err)
+	assert.Nil(t, extern)
+}
