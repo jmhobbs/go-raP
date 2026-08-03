@@ -1,1 +1,3 @@
 cover.out
+# Added by goreleaser init:
+dist/
