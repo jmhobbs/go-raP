@@ -32,8 +32,9 @@ func New(opts ...PrinterOption) *Printer {
 	return p
 }
 
-func (p *Printer) indent(level int, out io.Writer) {
-	fmt.Fprint(out, strings.Repeat(" ", p.indentDepth*level))
+func (p *Printer) indent(level int, out io.Writer) error {
+	_, err := fmt.Fprint(out, strings.Repeat(" ", p.indentDepth*level))
+	return err
 }
 
 func (p *Printer) File(out io.Writer, root *raP.File) error {
@@ -48,71 +49,120 @@ func (p *Printer) Entries(indentLevel int, out io.Writer, entries []entry.Entry)
 			if !ok {
 				return errors.New("error: Class entry is not of type *Class")
 			}
-			p.Class(indentLevel, out, class)
+			if err := p.Class(indentLevel, out, class); err != nil {
+				return err
+			}
 		case entry.EntryTypeAssignment:
 			assignment, ok := e.(*entry.Assignment)
 			if !ok {
 				return errors.New("error: Assignment entry is not of type *Assignment")
 			}
-			p.Assignment(indentLevel, out, assignment)
+			if err := p.Assignment(indentLevel, out, assignment); err != nil {
+				return err
+			}
 		case entry.EntryTypeArray:
 			array, ok := e.(*entry.Array)
 			if !ok {
 				return errors.New("error: Array entry is not of type *Array")
 			}
-			p.Array(indentLevel, out, array)
+			if err := p.Array(indentLevel, out, array); err != nil {
+				return err
+			}
+		case entry.EntryTypeExtern:
+			fallthrough
+		case entry.EntryTypeDelete:
+			fallthrough
+		case entry.EntryTypeArrayWithFlag:
+			return errors.New("not implemented")
 		default:
 			return fmt.Errorf("unknown entry type: %d", e.Type())
-			// todo:
-			// extern
-			// delete
-			// array with flag
 		}
 	}
 
 	return nil
 }
 
-func (p *Printer) Class(indentLevel int, out io.Writer, class *entry.Class) {
-	p.indent(indentLevel, out)
-	fmt.Fprintf(out, "class %s", class.Name)
+func (p *Printer) Class(indentLevel int, out io.Writer, class *entry.Class) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	if _, err = fmt.Fprintf(out, "class %s", class.Name); err != nil {
+		return err
+	}
 	if class.InheritedClassName != "" {
-		fmt.Fprintf(out, ": %s", class.InheritedClassName)
+		if _, err = fmt.Fprintf(out, ": %s", class.InheritedClassName); err != nil {
+			return err
+		}
+
 	}
-	fmt.Fprintln(out, "")
-	p.indent(indentLevel, out)
-	fmt.Fprint(out, "{\n")
-	p.Entries(indentLevel+1, out, class.Entries)
-	for range indentLevel {
-		fmt.Fprint(out, "  ")
+	if _, err = fmt.Fprintln(out, ""); err != nil {
+		return err
 	}
-	fmt.Fprint(out, "};\n")
+
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+
+	if _, err = fmt.Fprint(out, "{\n"); err != nil {
+		return err
+	}
+
+	if err = p.Entries(indentLevel+1, out, class.Entries); err != nil {
+		return err
+	}
+
+	if _, err = fmt.Fprint(out, strings.Repeat("  ", indentLevel)); err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprint(out, "};\n")
+	return err
 }
 
-func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *entry.Assignment) {
-	p.indent(indentLevel, out)
-	fmt.Fprintf(out, "%s = ", assignment.Name)
+func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *entry.Assignment) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	if _, err = fmt.Fprintf(out, "%s = ", assignment.Name); err != nil {
+		return err
+	}
 	switch assignment.Subtype {
 	case entry.AssignmentTypeString:
-		fmt.Fprintf(out, "%q", assignment.Value)
+		if _, err = fmt.Fprintf(out, "%q", assignment.Value); err != nil {
+			return err
+		}
 	case entry.AssignmentTypeLong:
-		fmt.Fprintf(out, "%d", assignment.Value)
+		if _, err = fmt.Fprintf(out, "%d", assignment.Value); err != nil {
+			return err
+		}
 	case entry.AssignmentTypeFloat:
-		fmt.Fprintf(out, "%f", assignment.Value)
+		if _, err = fmt.Fprintf(out, "%f", assignment.Value); err != nil {
+			return err
+		}
 	case entry.AssignmentTypeVariable:
-		fmt.Fprintf(out, "%s", assignment.Value)
+		if _, err = fmt.Fprintf(out, "%s", assignment.Value); err != nil {
+			return err
+		}
 	}
-	fmt.Fprint(out, ";\n")
+	_, err = fmt.Fprint(out, ";\n")
+	return err
 }
 
-func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) {
-	p.indent(indentLevel, out)
+func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) error {
+	var err error
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
 	// special case for empty arrays
 	if len(array.Values) == 0 {
-		fmt.Fprintf(out, "%s[] = {};\n", array.Name)
-		return
+		_, err = fmt.Fprintf(out, "%s[] = {};\n", array.Name)
+		return err
 	}
-	fmt.Fprintf(out, "%s[] = {\n", array.Name)
+	if _, err = fmt.Fprintf(out, "%s[] = {\n", array.Name); err != nil {
+		return err
+	}
 	valuesAsStrings := make([]string, len(array.Values))
 	valueIndent := strings.Repeat("  ", indentLevel+1)
 	for i, v := range array.Values {
@@ -123,9 +173,18 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) {
 			valuesAsStrings[i] = fmt.Sprintf("%s%d", valueIndent, v.Value)
 		case entry.ArrayValueTypeFloat:
 			valuesAsStrings[i] = fmt.Sprintf("%s%f", valueIndent, v.Value)
+		case entry.ArrayValueTypeArray:
+			fallthrough
+		case entry.ArrayValueTypeVariable:
+			return errors.New("not implemented")
 		}
 	}
-	fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")+"\n")
-	p.indent(indentLevel, out)
-	fmt.Fprint(out, "};\n")
+	if _, err = fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")); err != nil {
+		return err
+	}
+	if err = p.indent(indentLevel, out); err != nil {
+		return err
+	}
+	_, err = fmt.Fprint(out, "};\n")
+	return err
 }
