@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jmhobbs/go-raP"
+	"github.com/jmhobbs/go-raP/entry"
 )
 
 type Printer struct {
@@ -39,29 +40,29 @@ func (p *Printer) File(out io.Writer, root *raP.File) error {
 	return p.Entries(0, out, root.Entries)
 }
 
-func (p *Printer) Entries(indentLevel int, out io.Writer, entries []raP.Entry) error {
-	for _, entry := range entries {
-		switch entry.Type() {
-		case raP.EntryTypeClass:
-			class, ok := entry.(*raP.Class)
+func (p *Printer) Entries(indentLevel int, out io.Writer, entries []entry.Entry) error {
+	for _, e := range entries {
+		switch e.Type() {
+		case entry.EntryTypeClass:
+			class, ok := e.(*entry.Class)
 			if !ok {
 				return errors.New("error: Class entry is not of type *Class")
 			}
 			p.Class(indentLevel, out, class)
-		case raP.EntryTypeAssignment:
-			assignment, ok := entry.(*raP.Assignment)
+		case entry.EntryTypeAssignment:
+			assignment, ok := e.(*entry.Assignment)
 			if !ok {
 				return errors.New("error: Assignment entry is not of type *Assignment")
 			}
 			p.Assignment(indentLevel, out, assignment)
-		case raP.EntryTypeArray:
-			array, ok := entry.(*raP.Array)
+		case entry.EntryTypeArray:
+			array, ok := e.(*entry.Array)
 			if !ok {
 				return errors.New("error: Array entry is not of type *Array")
 			}
 			p.Array(indentLevel, out, array)
 		default:
-			return fmt.Errorf("unknown entry type: %d", entry.Type())
+			return fmt.Errorf("unknown entry type: %d", e.Type())
 			// todo:
 			// extern
 			// delete
@@ -72,7 +73,7 @@ func (p *Printer) Entries(indentLevel int, out io.Writer, entries []raP.Entry) e
 	return nil
 }
 
-func (p *Printer) Class(indentLevel int, out io.Writer, class *raP.Class) {
+func (p *Printer) Class(indentLevel int, out io.Writer, class *entry.Class) {
 	p.indent(indentLevel, out)
 	fmt.Fprintf(out, "class %s", class.Name)
 	if class.InheritedClassName != "" {
@@ -88,23 +89,23 @@ func (p *Printer) Class(indentLevel int, out io.Writer, class *raP.Class) {
 	fmt.Fprint(out, "};\n")
 }
 
-func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *raP.Assignment) {
+func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *entry.Assignment) {
 	p.indent(indentLevel, out)
 	fmt.Fprintf(out, "%s = ", assignment.Name)
 	switch assignment.Subtype {
-	case raP.AssignmentTypeString:
+	case entry.AssignmentTypeString:
 		fmt.Fprintf(out, "%q", assignment.Value)
-	case raP.AssignmentTypeLong:
+	case entry.AssignmentTypeLong:
 		fmt.Fprintf(out, "%d", assignment.Value)
-	case raP.AssignmentTypeFloat:
+	case entry.AssignmentTypeFloat:
 		fmt.Fprintf(out, "%f", assignment.Value)
-	case raP.AssignmentTypeVariable:
+	case entry.AssignmentTypeVariable:
 		fmt.Fprintf(out, "%s", assignment.Value)
 	}
 	fmt.Fprint(out, ";\n")
 }
 
-func (p *Printer) Array(indentLevel int, out io.Writer, array *raP.Array) {
+func (p *Printer) Array(indentLevel int, out io.Writer, array *entry.Array) {
 	p.indent(indentLevel, out)
 	// special case for empty arrays
 	if len(array.Values) == 0 {
@@ -116,11 +117,11 @@ func (p *Printer) Array(indentLevel int, out io.Writer, array *raP.Array) {
 	valueIndent := strings.Repeat("  ", indentLevel+1)
 	for i, v := range array.Values {
 		switch v.Type {
-		case raP.ArrayValueTypeString:
+		case entry.ArrayValueTypeString:
 			valuesAsStrings[i] = fmt.Sprintf("%s%q", valueIndent, v.Value)
-		case raP.ArrayValueTypeLong:
+		case entry.ArrayValueTypeLong:
 			valuesAsStrings[i] = fmt.Sprintf("%s%d", valueIndent, v.Value)
-		case raP.ArrayValueTypeFloat:
+		case entry.ArrayValueTypeFloat:
 			valuesAsStrings[i] = fmt.Sprintf("%s%f", valueIndent, v.Value)
 		}
 	}

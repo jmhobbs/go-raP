@@ -1,91 +1,14 @@
-package raP_test
+package entry_test
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/jmhobbs/go-raP"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/jmhobbs/go-raP/entry"
 )
-
-func Test_ReadAssignment(t *testing.T) {
-	t.Run("string", func(t *testing.T) {
-		input := []byte{
-			0x00,                                    // subtype 0
-			'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x00, // name
-			'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', 0x00, // value
-		}
-		assignment, err := raP.ReadAssignment(bytes.NewReader(input))
-		require.NoError(t, err)
-		assert.Equal(
-			t,
-			&raP.Assignment{
-				Name:    "example",
-				Subtype: raP.AssignmentTypeString,
-				Value:   "Hello, world!",
-			},
-			assignment,
-		)
-	})
-
-	t.Run("variable", func(t *testing.T) {
-		input := []byte{
-			0x04,                                    // subtype 4
-			'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x00, // name
-			'a', 'n', 'o', 't', 'h', 'e', 'r', 'V', 'a', 'r', 'i', 'a', 'b', 'l', 'e', 0x00, // value
-		}
-		assignment, err := raP.ReadAssignment(bytes.NewReader(input))
-		require.NoError(t, err)
-		assert.Equal(
-			t,
-			&raP.Assignment{
-				Name:    "example",
-				Subtype: raP.AssignmentTypeVariable,
-				Value:   "anotherVariable",
-			},
-			assignment,
-		)
-	})
-
-	t.Run("float", func(t *testing.T) {
-		input := []byte{
-			0x01,                                    // subtype 1
-			'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x00, // name
-			0xa4, 0x70, 0x9d, 0x3f, // 1.23 float32 little-endian
-		}
-		assignment, err := raP.ReadAssignment(bytes.NewReader(input))
-		require.NoError(t, err)
-		assert.Equal(
-			t,
-			&raP.Assignment{
-				Name:    "example",
-				Subtype: raP.AssignmentTypeFloat,
-				Value:   float32(1.23),
-			},
-			assignment,
-		)
-	})
-
-	t.Run("long", func(t *testing.T) {
-		input := []byte{
-			0x02,                                    // subtype 2
-			'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x00, // name
-			0x39, 0x30, 0x00, 0x00, // 12345 little-endian
-		}
-		assignment, err := raP.ReadAssignment(bytes.NewReader(input))
-		require.NoError(t, err)
-		assert.Equal(
-			t,
-			&raP.Assignment{
-				Name:    "example",
-				Subtype: raP.AssignmentTypeLong,
-				Value:   int32(12345),
-			},
-			assignment,
-		)
-	})
-}
 
 func Test_ReadArray(t *testing.T) {
 	t.Run("string array", func(t *testing.T) {
@@ -98,20 +21,20 @@ func Test_ReadArray(t *testing.T) {
 			't', 'w', 'o', 0x00, // value 2
 		}
 
-		arr, err := raP.ReadArray(bytes.NewReader(input))
+		arr, err := entry.ReadArray(bytes.NewReader(input))
 		require.NoError(t, err)
 		t.Log(arr)
 		assert.Equal(
 			t,
-			&raP.Array{
+			&entry.Array{
 				Name: "name",
-				Values: []raP.ArrayValue{
+				Values: []entry.ArrayValue{
 					{
-						Type:  raP.ArrayValueTypeString,
+						Type:  entry.ArrayValueTypeString,
 						Value: "one",
 					},
 					{
-						Type:  raP.ArrayValueTypeString,
+						Type:  entry.ArrayValueTypeString,
 						Value: "two",
 					},
 				},
@@ -130,20 +53,20 @@ func Test_ReadArray(t *testing.T) {
 			0xa4, 0x70, 0x9d, 0x3f, // 1.23 float32 little-endian
 		}
 
-		arr, err := raP.ReadArray(bytes.NewReader(input))
+		arr, err := entry.ReadArray(bytes.NewReader(input))
 		require.NoError(t, err)
 		t.Log(arr)
 		assert.Equal(
 			t,
-			&raP.Array{
+			&entry.Array{
 				Name: "name",
-				Values: []raP.ArrayValue{
+				Values: []entry.ArrayValue{
 					{
-						Type:  raP.ArrayValueTypeFloat,
+						Type:  entry.ArrayValueTypeFloat,
 						Value: float32(1.23),
 					},
 					{
-						Type:  raP.ArrayValueTypeFloat,
+						Type:  entry.ArrayValueTypeFloat,
 						Value: float32(1.23),
 					},
 				},
@@ -162,20 +85,20 @@ func Test_ReadArray(t *testing.T) {
 			0x02, 0x00, 0x00, 0x00, // value 2
 		}
 
-		arr, err := raP.ReadArray(bytes.NewReader(input))
+		arr, err := entry.ReadArray(bytes.NewReader(input))
 		require.NoError(t, err)
 		t.Log(arr)
 		assert.Equal(
 			t,
-			&raP.Array{
+			&entry.Array{
 				Name: "name",
-				Values: []raP.ArrayValue{
+				Values: []entry.ArrayValue{
 					{
-						Type:  raP.ArrayValueTypeLong,
+						Type:  entry.ArrayValueTypeLong,
 						Value: int32(1),
 					},
 					{
-						Type:  raP.ArrayValueTypeLong,
+						Type:  entry.ArrayValueTypeLong,
 						Value: int32(2),
 					},
 				},
@@ -202,36 +125,36 @@ func Test_ReadArray(t *testing.T) {
 			0x04, 0x00, 0x00, 0x00, // nested array 2 value 2
 		}
 
-		arr, err := raP.ReadArray(bytes.NewReader(input))
+		arr, err := entry.ReadArray(bytes.NewReader(input))
 		require.NoError(t, err)
 		t.Log(arr)
 		assert.Equal(
 			t,
-			&raP.Array{
+			&entry.Array{
 				Name: "name",
-				Values: []raP.ArrayValue{
+				Values: []entry.ArrayValue{
 					{
-						Type: raP.ArrayValueTypeArray,
-						Value: []raP.ArrayValue{
+						Type: entry.ArrayValueTypeArray,
+						Value: []entry.ArrayValue{
 							{
-								Type:  raP.ArrayValueTypeLong,
+								Type:  entry.ArrayValueTypeLong,
 								Value: int32(1),
 							},
 							{
-								Type:  raP.ArrayValueTypeLong,
+								Type:  entry.ArrayValueTypeLong,
 								Value: int32(2),
 							},
 						},
 					},
 					{
-						Type: raP.ArrayValueTypeArray,
-						Value: []raP.ArrayValue{
+						Type: entry.ArrayValueTypeArray,
+						Value: []entry.ArrayValue{
 							{
-								Type:  raP.ArrayValueTypeLong,
+								Type:  entry.ArrayValueTypeLong,
 								Value: int32(3),
 							},
 							{
-								Type:  raP.ArrayValueTypeLong,
+								Type:  entry.ArrayValueTypeLong,
 								Value: int32(4),
 							},
 						},
@@ -259,31 +182,31 @@ func Test_ReadArray(t *testing.T) {
 			0x01, 0x00, 0x00, 0x00, // nested array value 1
 		}
 
-		arr, err := raP.ReadArray(bytes.NewReader(input))
+		arr, err := entry.ReadArray(bytes.NewReader(input))
 		require.NoError(t, err)
 		t.Log(arr)
 		assert.Equal(
 			t,
-			&raP.Array{
+			&entry.Array{
 				Name: "name",
-				Values: []raP.ArrayValue{
+				Values: []entry.ArrayValue{
 					{
-						Type:  raP.ArrayValueTypeString,
+						Type:  entry.ArrayValueTypeString,
 						Value: "one",
 					},
 					{
-						Type:  raP.ArrayValueTypeFloat,
+						Type:  entry.ArrayValueTypeFloat,
 						Value: float32(1.23),
 					},
 					{
-						Type:  raP.ArrayValueTypeLong,
+						Type:  entry.ArrayValueTypeLong,
 						Value: int32(12345),
 					},
 					{
-						Type: raP.ArrayValueTypeArray,
-						Value: []raP.ArrayValue{
+						Type: entry.ArrayValueTypeArray,
+						Value: []entry.ArrayValue{
 							{
-								Type:  raP.ArrayValueTypeLong,
+								Type:  entry.ArrayValueTypeLong,
 								Value: int32(1)},
 						},
 					},

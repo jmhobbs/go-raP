@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/jmhobbs/go-raP"
-	"github.com/jmhobbs/go-raP/printer"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/jmhobbs/go-raP/entry"
+	"github.com/jmhobbs/go-raP/printer"
 )
 
 func Test_PrintAssignment(t *testing.T) {
@@ -16,9 +17,9 @@ func Test_PrintAssignment(t *testing.T) {
 		printer.New().Assignment(
 			0,
 			&buf,
-			&raP.Assignment{
+			&entry.Assignment{
 				Name:    "example",
-				Subtype: raP.AssignmentTypeString,
+				Subtype: entry.AssignmentTypeString,
 				Value:   "Hello, world!",
 			},
 		)
@@ -32,9 +33,9 @@ func Test_PrintAssignment(t *testing.T) {
 		printer.New().Assignment(
 			0,
 			&buf,
-			&raP.Assignment{
+			&entry.Assignment{
 				Name:    "example",
-				Subtype: raP.AssignmentTypeFloat,
+				Subtype: entry.AssignmentTypeFloat,
 				Value:   float32(1.23),
 			},
 		)
@@ -48,9 +49,9 @@ func Test_PrintAssignment(t *testing.T) {
 		printer.New().Assignment(
 			0,
 			&buf,
-			&raP.Assignment{
+			&entry.Assignment{
 				Name:    "example",
-				Subtype: raP.AssignmentTypeLong,
+				Subtype: entry.AssignmentTypeLong,
 				Value:   int32(23512),
 			},
 		)
@@ -64,9 +65,9 @@ func Test_PrintAssignment(t *testing.T) {
 		printer.New().Assignment(
 			0,
 			&buf,
-			&raP.Assignment{
+			&entry.Assignment{
 				Name:    "example",
-				Subtype: raP.AssignmentTypeVariable,
+				Subtype: entry.AssignmentTypeVariable,
 				Value:   "anotherVariable",
 			},
 		)
