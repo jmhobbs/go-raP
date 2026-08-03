@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/jmhobbs/go-raP"
@@ -233,7 +234,7 @@ func (p *Printer) arrayValues(indentLevel int, out io.Writer, values []entry.Arr
 		case entry.ArrayValueTypeLong:
 			valuesAsStrings[i] = fmt.Sprintf("%s%d", valueIndent, v.Value)
 		case entry.ArrayValueTypeFloat:
-			valuesAsStrings[i] = fmt.Sprintf("%s%f", valueIndent, v.Value)
+			valuesAsStrings[i] = valueIndent + strconv.FormatFloat(float64(v.Value.(float32)), 'f', -1, 32)
 		case entry.ArrayValueTypeArray:
 			// TODO
 			fallthrough

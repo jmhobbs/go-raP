@@ -10,7 +10,7 @@ import (
 	"github.com/jmhobbs/go-raP/printer"
 )
 
-func Test_PrintAssignment(t *testing.T) {
+func Test_Assignment(t *testing.T) {
 	t.Run("string", func(t *testing.T) {
 		var buf bytes.Buffer
 
@@ -74,4 +74,65 @@ func Test_PrintAssignment(t *testing.T) {
 
 		assert.Equal(t, `example = anotherVariable;`+"\n", buf.String())
 	})
+}
+
+func Test_Array(t *testing.T) {
+	var buf bytes.Buffer
+
+	printer.New().Array(
+		0,
+		&buf,
+		&entry.Array{
+			Name: "example",
+			Values: []entry.ArrayValue{
+				{
+					Type:  entry.ArrayValueTypeString,
+					Value: "Hello",
+				},
+				{
+					Type:  entry.ArrayValueTypeFloat,
+					Value: float32(1.23),
+				},
+				{
+					Type:  entry.ArrayValueTypeLong,
+					Value: 54321,
+				},
+			},
+		},
+	)
+
+	assert.Equal(t, `example[] = {
+  "Hello",
+  1.23,
+  54321
+};
+`, buf.String())
+}
+
+func Test_Extern(t *testing.T) {
+	var buf bytes.Buffer
+
+	extern := entry.Extern("example")
+
+	printer.New().Extern(
+		0,
+		&buf,
+		&extern,
+	)
+
+	assert.Equal(t, "class example;\n", buf.String())
+}
+
+func Test_Delete(t *testing.T) {
+	var buf bytes.Buffer
+
+	del := entry.Delete("example")
+
+	printer.New().Delete(
+		0,
+		&buf,
+		&del,
+	)
+
+	assert.Equal(t, "delete example;\n", buf.String())
 }
