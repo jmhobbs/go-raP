@@ -1,6 +1,7 @@
 package printer
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -244,8 +245,17 @@ func (p *Printer) arrayValues(indentLevel int, out io.Writer, values []entry.Arr
 		case entry.ArrayValueTypeFloat:
 			valuesAsStrings[i] = valueIndent + strconv.FormatFloat(float64(v.Value.(float32)), 'f', -1, 32)
 		case entry.ArrayValueTypeArray:
-			// TODO
-			fallthrough
+			var buf bytes.Buffer
+			if _, err := fmt.Fprintf(&buf, "%s{\n", valueIndent); err != nil {
+				return err
+			}
+			if err := p.arrayValues(indentLevel+1, &buf, v.Value.([]entry.ArrayValue)); err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintf(&buf, "%s}", valueIndent); err != nil {
+				return err
+			}
+			valuesAsStrings[i] = buf.String()
 		case entry.ArrayValueTypeVariable:
 			return errors.New("not implemented")
 		}

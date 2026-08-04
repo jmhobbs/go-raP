@@ -13,7 +13,6 @@ class CfgPatches
     };
   };
 };
-
 class CfgMods
 {
   class WILDLANDZ_GreenCounty_ONUTakeover
@@ -25,4 +24,3 @@ class CfgMods
     dependencies[] = {};
   };
 };
-

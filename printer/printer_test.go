@@ -132,6 +132,15 @@ func Test_Array(t *testing.T) {
 					Type:  entry.ArrayValueTypeLong,
 					Value: 54321,
 				},
+				{
+					Type: entry.ArrayValueTypeArray,
+					Value: []entry.ArrayValue{
+						{
+							Type:  entry.ArrayValueTypeString,
+							Value: "Nested",
+						},
+					},
+				},
 			},
 		},
 	)
@@ -139,7 +148,10 @@ func Test_Array(t *testing.T) {
 	assert.Equal(t, `example[] = {
   "Hello",
   1.23,
-  54321
+  54321,
+  {
+    "Nested"
+  }
 };
 `, buf.String())
 }
