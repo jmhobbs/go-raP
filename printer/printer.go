@@ -13,6 +13,7 @@ import (
 
 type Printer struct {
 	indentDepth int
+	indentRune  string
 }
 
 type PrinterOption func(*Printer)
@@ -23,9 +24,16 @@ func WithIndentDepth(depth int) PrinterOption {
 	}
 }
 
+func WithIndentRune(indent rune) PrinterOption {
+	return func(p *Printer) {
+		p.indentRune = string(indent)
+	}
+}
+
 func New(opts ...PrinterOption) *Printer {
 	p := &Printer{
 		indentDepth: 2,
+		indentRune:  " ",
 	}
 	for _, opt := range opts {
 		opt(p)
@@ -34,7 +42,7 @@ func New(opts ...PrinterOption) *Printer {
 }
 
 func (p *Printer) indent(level int, out io.Writer) error {
-	_, err := fmt.Fprint(out, strings.Repeat(" ", p.indentDepth*level))
+	_, err := fmt.Fprint(out, strings.Repeat(p.indentRune, p.indentDepth*level))
 	return err
 }
 

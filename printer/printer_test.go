@@ -5,10 +5,45 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/jmhobbs/go-raP/entry"
 	"github.com/jmhobbs/go-raP/printer"
 )
+
+func Test_PrinterOptions(t *testing.T) {
+	t.Run("indent depth", func(t *testing.T) {
+		var buf bytes.Buffer
+		err := printer.New(printer.WithIndentDepth(3)).Assignment(
+			1,
+			&buf,
+			&entry.Assignment{
+				Name:    "example",
+				Subtype: entry.AssignmentTypeString,
+				Value:   "Hello, world!",
+			},
+		)
+		require.NoError(t, err)
+
+		assert.Equal(t, `   example = "Hello, world!";`+"\n", buf.String())
+	})
+
+	t.Run("indent rune", func(t *testing.T) {
+		var buf bytes.Buffer
+		err := printer.New(printer.WithIndentRune('-')).Assignment(
+			1,
+			&buf,
+			&entry.Assignment{
+				Name:    "example",
+				Subtype: entry.AssignmentTypeString,
+				Value:   "Hello, world!",
+			},
+		)
+		require.NoError(t, err)
+
+		assert.Equal(t, `--example = "Hello, world!";`+"\n", buf.String())
+	})
+}
 
 func Test_Assignment(t *testing.T) {
 	t.Run("string", func(t *testing.T) {
