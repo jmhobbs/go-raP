@@ -40,7 +40,7 @@ func Test_Assignment(t *testing.T) {
 			},
 		)
 
-		assert.Equal(t, `example = 1.230000;`+"\n", buf.String())
+		assert.Equal(t, `example = 1.23;`+"\n", buf.String())
 	})
 
 	t.Run("long", func(t *testing.T) {

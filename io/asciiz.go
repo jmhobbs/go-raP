@@ -6,8 +6,8 @@ import (
 
 func ReadAsciiz(in gio.Reader) ([]byte, error) {
 	var (
-		buf        = make([]byte, 1)
-		out []byte = []byte{}
+		buf = make([]byte, 1)
+		out = []byte{}
 		err error
 	)
 

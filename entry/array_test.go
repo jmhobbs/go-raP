@@ -215,4 +215,68 @@ func Test_ReadArray(t *testing.T) {
 			arr,
 		)
 	})
+
+	t.Run("variable array", func(t *testing.T) {
+		input := []byte{
+			'n', 'a', 'm', 'e', 0x00, // name
+			0x01,                          // count
+			0x04,                          // value 1 type (variable)
+			'o', 't', 'h', 'e', 'r', 0x00, // value 1
+		}
+
+		arr, err := entry.ReadArray(bytes.NewReader(input))
+		require.NoError(t, err)
+		assert.Equal(
+			t,
+			&entry.Array{
+				Name: "name",
+				Values: []entry.ArrayValue{
+					{
+						Type:  entry.ArrayValueTypeVariable,
+						Value: "other",
+					},
+				},
+			},
+			arr,
+		)
+	})
+
+	t.Run("unknown element type", func(t *testing.T) {
+		input := []byte{
+			'n', 'a', 'm', 'e', 0x00, // name
+			0x01, // count
+			0x09, // value 1 type (unknown)
+		}
+
+		arr, err := entry.ReadArray(bytes.NewReader(input))
+		require.Error(t, err)
+		assert.Nil(t, arr)
+	})
+}
+
+func Test_ReadArrayWithFlag(t *testing.T) {
+	input := []byte{
+		0x01, 0x00, 0x00, 0x00, // flag
+		'n', 'a', 'm', 'e', 0x00, // name
+		0x01,                   // count
+		0x02,                   // value 1 type (long)
+		0x39, 0x30, 0x00, 0x00, // value 1
+	}
+
+	arr, err := entry.ReadArrayWithFlag(bytes.NewReader(input))
+	require.NoError(t, err)
+	assert.Equal(
+		t,
+		&entry.ArrayWithFlag{
+			Name: "name",
+			Flag: 1,
+			Values: []entry.ArrayValue{
+				{
+					Type:  entry.ArrayValueTypeLong,
+					Value: int32(12345),
+				},
+			},
+		},
+		arr,
+	)
 }

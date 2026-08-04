@@ -86,4 +86,14 @@ func Test_ReadAssignment(t *testing.T) {
 			assignment,
 		)
 	})
+
+	t.Run("unknown subtype", func(t *testing.T) {
+		input := []byte{
+			0x09,                                    // subtype 9 (unknown)
+			'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x00, // name
+		}
+		assignment, err := entry.ReadAssignment(bytes.NewReader(input))
+		require.Error(t, err)
+		assert.Nil(t, assignment)
+	})
 }

@@ -157,7 +157,7 @@ func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *entry.A
 			return err
 		}
 	case entry.AssignmentTypeFloat:
-		if _, err = fmt.Fprintf(out, "%f", assignment.Value); err != nil {
+		if _, err = fmt.Fprint(out, strconv.FormatFloat(float64(assignment.Value.(float32)), 'f', -1, 32)); err != nil {
 			return err
 		}
 	case entry.AssignmentTypeVariable:
