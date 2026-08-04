@@ -141,6 +141,10 @@ func Test_Array(t *testing.T) {
 						},
 					},
 				},
+				{
+					Type:  entry.ArrayValueTypeVariable,
+					Value: "anotherVariable",
+				},
 			},
 		},
 	)
@@ -151,7 +155,8 @@ func Test_Array(t *testing.T) {
   54321,
   {
     "Nested"
-  }
+  },
+  anotherVariable
 };
 `, buf.String())
 }

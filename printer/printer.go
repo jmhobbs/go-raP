@@ -257,7 +257,7 @@ func (p *Printer) arrayValues(indentLevel int, out io.Writer, values []entry.Arr
 			}
 			valuesAsStrings[i] = buf.String()
 		case entry.ArrayValueTypeVariable:
-			return errors.New("not implemented")
+			valuesAsStrings[i] = fmt.Sprintf("%s%s", valueIndent, v.Value)
 		}
 	}
 	if _, err := fmt.Fprint(out, strings.Join(valuesAsStrings, ",\n")); err != nil {
