@@ -158,7 +158,7 @@ func (p *Printer) Assignment(indentLevel int, out io.Writer, assignment *entry.A
 	}
 	switch assignment.Subtype {
 	case entry.AssignmentTypeString:
-		if _, err = fmt.Fprintf(out, "%q", assignment.Value); err != nil {
+		if _, err = fmt.Fprintf(out, "%s", QuotedString(assignment.Value.(string))); err != nil {
 			return err
 		}
 	case entry.AssignmentTypeLong:
@@ -239,7 +239,7 @@ func (p *Printer) arrayValues(indentLevel int, out io.Writer, values []entry.Arr
 	for i, v := range values {
 		switch v.Type {
 		case entry.ArrayValueTypeString:
-			valuesAsStrings[i] = fmt.Sprintf("%s%q", valueIndent, v.Value)
+			valuesAsStrings[i] = fmt.Sprintf("%s%s", valueIndent, QuotedString(v.Value.(string)))
 		case entry.ArrayValueTypeLong:
 			valuesAsStrings[i] = fmt.Sprintf("%s%d", valueIndent, v.Value)
 		case entry.ArrayValueTypeFloat:
@@ -284,4 +284,8 @@ func (p *Printer) Delete(indentLevel int, out io.Writer, del *entry.Delete) erro
 	// TODO: I have never actually seen this, not sure what the real syntax is
 	_, err = fmt.Fprintf(out, "delete %s;\n", string(*del))
 	return err
+}
+
+func QuotedString(s string) string {
+	return `"` + strings.ReplaceAll(s, `"`, `\"`) + `"`
 }

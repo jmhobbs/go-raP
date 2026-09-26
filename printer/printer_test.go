@@ -125,6 +125,14 @@ func Test_Array(t *testing.T) {
 					Value: "Hello",
 				},
 				{
+					Type:  entry.ArrayValueTypeString,
+					Value: "Forward/Slashes/Here",
+				},
+				{
+					Type:  entry.ArrayValueTypeString,
+					Value: `Backward\Slashes\Here`,
+				},
+				{
 					Type:  entry.ArrayValueTypeFloat,
 					Value: float32(1.23),
 				},
@@ -151,6 +159,8 @@ func Test_Array(t *testing.T) {
 
 	assert.Equal(t, `example[] = {
   "Hello",
+  "Forward/Slashes/Here",
+  "Backward\Slashes\Here",
   1.23,
   54321,
   {
@@ -187,4 +197,34 @@ func Test_Delete(t *testing.T) {
 	)
 
 	assert.Equal(t, "delete example;\n", buf.String())
+}
+
+func Test_QuotedString(t *testing.T) {
+	tests := []struct {
+		Name     string
+		Input    string
+		Expected string
+	}{
+		{
+			Name:     "Simple",
+			Input:    "Hello, world!",
+			Expected: `"Hello, world!"`,
+		},
+		{
+			Name:     "Quotes",
+			Input:    `"Hello, world!"`,
+			Expected: `"\"Hello, world!\""`,
+		},
+		{
+			Name:     "Backslashes",
+			Input:    `back\slash\path`,
+			Expected: `"back\slash\path"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			assert.Equal(t, tt.Expected, printer.QuotedString(tt.Input))
+		})
+	}
 }
